@@ -6,7 +6,7 @@ Allows user to find a stock and visualise its price over time, and invest with p
 
 -   Make sure you have node installed
 -   Install dependencies with `npm i`
--   Run app with `npm run dev`
+-   Run app with `npm run dev`, this will open a server on http://localhost:3000/
 -   The entry of the project is in ./src/pages/\_app.tsx
 -   Since this is a Next.Js app, it has folder based page routing
 -   To start adding content, add stuff to ./src/pages/index.tsx
