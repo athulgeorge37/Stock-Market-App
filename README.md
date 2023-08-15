@@ -27,3 +27,4 @@ Allows user to find a stock and visualise its price over time, and invest with p
 -   We will be using a free [API KEY](https://www.alphavantage.co/support/#api-key) that is limited to:
     -   5 API calls a minute
     -   100 API calls a day
+-   but for testing purposes, we will use the predefined endpoints with api-key="demo" to make development easier
