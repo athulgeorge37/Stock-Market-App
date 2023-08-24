@@ -1,26 +1,39 @@
-import { useQuery } from "@tanstack/react-query";
-import { api } from "~/api";
+import { type ElementRef, useRef, useEffect } from "react";
+import { type z } from "zod";
+import { type api } from "~/api";
+import { select } from "d3";
+
+interface StockVisualizerProps {
+    metaData: z.infer<typeof api.alphaVantage.daily.schema>["metaData"];
+    data: z.infer<typeof api.alphaVantage.daily.schema>["timeSeries"];
+}
+
+const testData = [25, 30, 45, 60, 20];
 
 const StockVisualizer = () => {
-    const stockData = useQuery({
-        queryKey: [api.alphaVantage.daily.key],
-        queryFn: () =>
-            api.alphaVantage.daily.query({
-                testing: true,
-            }),
-    });
+    // using a ref to let d3 handle rendering of the svg
+    const svgRef = useRef<ElementRef<"svg">>(null);
 
-    if (stockData.isLoading) {
-        return <span>Loading...</span>;
-    }
+    useEffect(() => {
+        const svg = select(svgRef.current);
 
-    //const k = stockData.data?.["Time Series (5min)"].at(0)
+        svg.selectAll("circle")
+            .data(testData)
+            // .join(
+            //     (enter) => enter.append("circle"),
+            //     (update) => update.attr("class", "updated"),
+            //     (exit) => exit.remove()
+            // )
+            .join("circle") // this line and the above line do the same
+            .attr("r", (v) => v) // v represents the data from testData
+            .attr("cx", (v) => v * 2)
+            .attr("cy", (v) => v * 2)
+            .attr("stroke", "red");
+    }, []);
 
     return (
-        <div>
-            <pre className={"w-full max-w-xs text-clip"}>
-                {JSON.stringify(stockData.data ?? stockData.error, null, 4)}
-            </pre>
+        <div className="w-fit rounded-md border-2 border-emerald-600">
+            <svg ref={svgRef}></svg>
         </div>
     );
 };
