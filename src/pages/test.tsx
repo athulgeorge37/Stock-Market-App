@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { api } from "~/api";
 import StockVisualizer from "~/features/graphs/StockVisualizer";
+import TestGraph from "~/features/graphs/TestGraph";
 
 export default function Test() {
     const stockData = useQuery({
@@ -27,7 +28,7 @@ export default function Test() {
             </Head>
             <main className="flex min-h-screen flex-col">
                 <div className="mx-auto my-16 flex w-full max-w-7xl flex-col gap-4">
-                    {/* {stockData.isLoading ? (
+                    {stockData.isLoading ? (
                         <span>Loading...</span>
                     ) : (
                         <>
@@ -48,8 +49,8 @@ export default function Test() {
                                 )}
                             </pre>
                         </>
-                    )} */}
-                    <StockVisualizer />
+                    )}
+                    {/* <TestGraph /> */}
                 </div>
             </main>
         </>

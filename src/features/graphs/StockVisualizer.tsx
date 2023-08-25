@@ -14,11 +14,16 @@ import {
     axisBottom,
     scaleLinear,
     axisRight,
+    scaleTime,
+    extent,
+    max,
+    area,
+    min,
 } from "d3";
 
 interface StockVisualizerProps {
     metaData: z.infer<typeof api.alphaVantage.daily.schema>["metaData"];
-    data: z.infer<typeof api.alphaVantage.daily.schema>["timeSeries"];
+    data: z.infer<typeof api.alphaVantage.daily.schema>["timeSeries"]; // use the close value as the number to use
 }
 
 const useResizeObserver = (ref: RefObject<ElementRef<"div">>) => {
@@ -42,9 +47,14 @@ const useResizeObserver = (ref: RefObject<ElementRef<"div">>) => {
     return dimensions;
 };
 
-const testData = [0, 30, 40, 60, 20, 60, 75];
+const margin = {
+    top: 70,
+    right: 60,
+    bottom: 50,
+    left: 80,
+} as const;
 
-const StockVisualizer = () => {
+const StockVisualizer = ({ data }: StockVisualizerProps) => {
     // using a ref to let d3 handle rendering of the svg
     const svgRef = useRef<ElementRef<"svg">>(null);
     const svgWrapperRef = useRef<ElementRef<"div">>(null);
@@ -56,54 +66,64 @@ const StockVisualizer = () => {
 
         if (dimensions === null) return;
 
-        console.log({ height: dimensions.height, width: dimensions.width });
+        const width = dimensions.width - margin.left - margin.right;
+        const height = dimensions.height - margin.top - margin.bottom;
 
-        // xScale will take a domain value and scale it linearly to the range
-        // for example, domain 0 --> 0 range and domain 6 --> 300 range
-        const xScale = scaleLinear()
-            .domain([0, testData.length - 1])
-            .range([0, dimensions.width]);
+        const xScale = scaleTime()
+            .range([0, width])
+            .domain(extent(data, (d) => d.date));
 
-        // axis bottom only positions the ticks on the bottom side of the horizontal line
-        const xAxis = axisBottom(xScale).ticks(testData.length);
+        const minimum = min(data, (d) => d.close);
+        const maximum = max(data, (d) => d.close);
+        const yScale = scaleLinear()
+            .domain([minimum - 0.2, maximum + 0.2])
+            .range([height, 0]);
+
+        const xAxis = axisBottom(xScale);
         // .tickFormat((index) => index + 1);
         svg.select("#x-axis")
-            .style("transform", `translateY(${dimensions.height}}px)`)
+            .style("transform", `translateY(${height}px)`)
             .call(xAxis);
 
-        const yScale = scaleLinear()
-            .domain([0, 150])
-            .range([dimensions.height, 0]);
         const yAxis = axisRight(yScale);
         svg.select("#y-axis")
-            .style("transform", `translateX(${dimensions.width}}px)`)
+            .style("transform", `translateX(${width}px)`)
             .call(yAxis);
 
-        // creating a function that takes a number a applies the scales to each line
-        const myLine = line<(typeof testData)[number]>()
-            .x((value, index) => xScale(index))
-            .y((value) => yScale(value))
-            .curve(curveCardinal);
+        const myLine = line<(typeof data)[number]>()
+            .x((value) => xScale(value.date))
+            .y((value) => yScale(value.close));
 
-        // creating the line from the data
-        svg.selectAll("#line")
-            // since we dont want a path for every data point, we put our array into another array
-            .data([testData])
-            .join("path")
-            .attr("id", "line")
-            .attr("d", (v) => myLine(v))
+        const myArea = area<(typeof data)[number]>()
+            .x((d) => xScale(d.date))
+            .y0(height)
+            .y1((d) => d.close);
+
+        // svg.append("path")
+        //     .datum(data)
+        //     .attr("class", "area")
+        //     .attr("d", myArea)
+        //     .attr("fill", "#85bb65")
+        //     .attr("opacity", 0.5);
+
+        svg.append("path")
+            .datum(data)
+            .attr("class", "line")
             .attr("fill", "none")
-            .attr("stroke", "blue");
+            .attr("stroke", "blue")
+            .attr("stroke-width", 1)
+            .attr("opacity", 0.5)
+            .attr("d", myLine);
     }, [dimensions]);
 
     return (
         <div
             ref={svgWrapperRef}
-            className="w-full max-w-[600px] px-10"
+            className="h-[700px] w-full max-w-[1200px] bg-slate-100"
         >
             <svg
                 ref={svgRef}
-                className="block w-full overflow-visible bg-slate-100"
+                className="block w-full overflow-visible"
             >
                 <g id="x-axis" />
                 <g id="y-axis" />
