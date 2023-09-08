@@ -1,10 +1,18 @@
+import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
-import { useState } from "react";
+import { api } from "~/api";
+import Button from "~/components/Button";
 import Input from "~/components/Input";
+import StockVisualizer from "~/features/graphs/StockVisualizer";
 
 export default function Home() {
-    const [total, setTotal] = useState(0);
-    const [text, setText] = useState("");
+    const stockData = useQuery({
+        queryKey: [api.alphaVantage.daily.key],
+        queryFn: () =>
+            api.alphaVantage.daily.query({
+                testing: true,
+            }),
+    });
 
     return (
         <>
@@ -20,25 +28,64 @@ export default function Home() {
                 />
             </Head>
             <main className="flex min-h-screen flex-col">
-                <div className="mx-auto my-16 flex w-full max-w-7xl flex-col gap-4">
-                    <div className="flex items-center gap-2">
+                <div className="mx-auto mt-10 w-full max-w-7xl">
+                    <h1 className="text-3xl font-bold">Stock Visualizer</h1>
+
+                    <div className="mt-4 flex items-end justify-between">
                         <Input
-                            placeholder={"TSLA"}
-                            id="find-a-stock-input"
-                            error="ivalid ticker symbol"
-                            onChange={(e) => setText(e.target.value)}
+                            id="search-stock"
+                            placeholder="TSLA"
+                            label="Find A stock"
+                            className="w-[400px]"
+                            hideError
                         />
-                        <span>{text}</span>
+
+                        <div className="flex h-fit gap-2">
+                            <Button variant={"blue"}>Day</Button>
+                            <Button variant={"white-outline"}>Week</Button>
+
+                            <Button variant={"white-outline"}>Month</Button>
+
+                            <Button variant={"white-outline"}>Year</Button>
+                        </div>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={() => setTotal(total + 1)}
-                    >
-                        Add + 1
-                    </button>
+                    <div className="my-10 w-full">
+                        {stockData.isLoading ? (
+                            <span>Loading...</span>
+                        ) : (
+                            <>
+                                {stockData.data ? (
+                                    <StockVisualizer
+                                        metaData={stockData.data.metaData}
+                                        data={stockData.data.timeSeries}
+                                    />
+                                ) : (
+                                    <span>No Data Available</span>
+                                )}
 
-                    <span>{total}</span>
+                                {/* <pre
+                                        className={"w-full max-w-xs text-clip"}
+                                    >
+                                        {JSON.stringify(
+                                            stockData.data ?? stockData.error,
+                                            null,
+                                            4
+                                        )}
+                                    </pre> */}
+                            </>
+                        )}
+                    </div>
+
+                    <div>
+                        <Input
+                            id="select-investment-start-date"
+                            type="date"
+                            label="Select Investment Date"
+                            className="w-[400px]"
+                            hideError
+                        />
+                    </div>
                 </div>
             </main>
         </>

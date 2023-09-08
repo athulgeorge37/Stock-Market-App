@@ -28,6 +28,7 @@ export default function Test() {
             </Head>
             <main className="flex min-h-screen flex-col">
                 <div className="mx-auto my-16 flex w-full max-w-7xl flex-col gap-4">
+                    <TestGraph />
                     {stockData.isLoading ? (
                         <span>Loading...</span>
                     ) : (
@@ -50,7 +51,6 @@ export default function Test() {
                             </pre>
                         </>
                     )}
-                    {/* <TestGraph /> */}
                 </div>
             </main>
         </>
