@@ -29,7 +29,7 @@ const LoadingSpinner = ({
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
             >
-                <g className="spinner_V8m1">
+                <g className="loading_spinner">
                     <circle
                         cx="12"
                         cy="12"

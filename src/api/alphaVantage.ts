@@ -1,8 +1,7 @@
-import { sleep } from "~/helper/functions/time";
 import { ax } from "./axios";
 import axios from "axios";
 import { z } from "zod";
-import { format, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
 
 const dailyReturnSchema = z
     .object({
@@ -70,14 +69,88 @@ const dailyReturnSchema = z
         timeSeries: v["Time Series (5min)"],
     }));
 
+const tickerSearchReturnSchema = z.object({
+    bestMatches: z.array(
+        z
+            .object({
+                "1. symbol": z.string(),
+                "2. name": z.string(),
+                "3. type": z.string(),
+                "4. region": z.string(),
+                "5. marketOpen": z.string(),
+                "6. marketClose": z.string(),
+                "7. timezone": z.string(),
+                "8. currency": z.string(),
+                "9. matchScore": z.string().transform((v) => parseFloat(v)),
+            })
+            .transform((v) => ({
+                symbol: v["1. symbol"],
+                name: v["2. name"],
+                type: v["3. type"],
+                region: v["4. region"],
+                timezone: v["7. timezone"],
+                currency: v["8. currency"],
+                matchScore: v["9. matchScore"],
+            }))
+    ),
+});
+
+const getSymbolDataReturnSchema = z.object({
+    Symbol: z.string(),
+    AssetType: z.string(),
+    Name: z.string(),
+    Description: z.string(),
+    CIK: z.string().transform((v) => parseInt(v)),
+    Exchange: z.string(),
+    Currency: z.string(),
+    Country: z.string(),
+    Sector: z.string(),
+    Industry: z.string(),
+    Address: z.string(),
+    FiscalYearEnd: z.string(),
+    LatestQuarter: z.string(), //"2023-06-30",
+    MarketCapitalization: z.string().transform((v) => parseInt(v)),
+    EBITDA: z.string().transform((v) => parseInt(v)),
+    PERatio: z.string().transform((v) => parseFloat(v)),
+    PEGRatio: z.string().transform((v) => parseFloat(v)),
+    BookValue: z.string().transform((v) => parseFloat(v)),
+    DividendPerShare: z.string().transform((v) => parseFloat(v)),
+    DividendYield: z.string().transform((v) => parseFloat(v)),
+    EPS: z.string().transform((v) => parseFloat(v)),
+    RevenuePerShareTTM: z.string().transform((v) => parseFloat(v)),
+    ProfitMargin: z.string().transform((v) => parseFloat(v)),
+    OperatingMarginTTM: z.string().transform((v) => parseFloat(v)),
+    ReturnOnAssetsTTM: z.string().transform((v) => parseFloat(v)),
+    ReturnOnEquityTTM: z.string().transform((v) => parseFloat(v)),
+    RevenueTTM: z.string().transform((v) => parseInt(v)),
+    GrossProfitTTM: z.string().transform((v) => parseInt(v)),
+    DilutedEPSTTM: z.string().transform((v) => parseFloat(v)),
+    QuarterlyEarningsGrowthYOY: z.string().transform((v) => parseFloat(v)),
+    QuarterlyRevenueGrowthYOY: z.string().transform((v) => parseFloat(v)),
+    AnalystTargetPrice: z.string().transform((v) => parseFloat(v)),
+    TrailingPE: z.string().transform((v) => parseFloat(v)),
+    ForwardPE: z.string().transform((v) => parseFloat(v)),
+    PriceToSalesRatioTTM: z.string().transform((v) => parseFloat(v)),
+    PriceToBookRatio: z.string().transform((v) => parseFloat(v)),
+    EVToRevenue: z.string().transform((v) => parseFloat(v)),
+    EVToEBITDA: z.string().transform((v) => parseFloat(v)),
+    Beta: z.string().transform((v) => parseFloat(v)),
+    "52WeekHigh": z.string().transform((v) => parseFloat(v)),
+    "52WeekLow": z.string().transform((v) => parseFloat(v)),
+    "50DayMovingAverage": z.string().transform((v) => parseFloat(v)),
+    "200DayMovingAverage": z.string().transform((v) => parseFloat(v)),
+    SharesOutstanding: z.string().transform((v) => parseInt(v)),
+    DividendDate: z.string(), // "2023-09-09",
+    ExDividendDate: z.string(), // "2023-08-09",
+});
+
 const alphaVantage = {
     daily: {
         key: "daily",
         schema: dailyReturnSchema,
         query: async ({
-            symbol = "IBM",
+            symbol,
             interval = "5min",
-
             // period = "TIME_SERIES_INTRADAY",
             testing = true,
         }: {
@@ -89,7 +162,7 @@ const alphaVantage = {
             //     | "TIME_SERIES_MONTHLY";
             interval?: "1min" | "5min" | "15min" | "30min" | "60min";
 
-            testing?: boolean;
+            testing: boolean;
         }) => {
             if (testing) {
                 const response = await axios.get(
@@ -102,14 +175,71 @@ const alphaVantage = {
             // api key is attached to ax
             const response = await ax.get("", {
                 params: {
-                    // function: period,
+                    function: "TIME_SERIES_INTRADAY",
                     symbol,
-                    //...(period === "TIME_SERIES_INTRADAY" && { interval }),
-                    // adjusted,
+                    interval,
                 },
             });
 
             return dailyReturnSchema.parse(response.data);
+        },
+    },
+    tickerSearch: {
+        key: "tickerSearch",
+        schema: tickerSearchReturnSchema,
+        query: async ({
+            keywordSearch,
+            testing = true,
+        }: {
+            keywordSearch: string;
+            testing: boolean;
+        }) => {
+            if (testing) {
+                const response = await axios.get(
+                    "https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=tesco&apikey=demo"
+                );
+
+                return tickerSearchReturnSchema.parse(response.data);
+            }
+
+            // api key is attached to ax
+            const response = await ax.get("", {
+                params: {
+                    function: "SYMBOL_SEARCH",
+                    keywords: keywordSearch,
+                },
+            });
+
+            return tickerSearchReturnSchema.parse(response.data);
+        },
+    },
+    getSymbolData: {
+        key: "getSymbolData",
+        schema: getSymbolDataReturnSchema,
+        query: async ({
+            symbol,
+            testing = true,
+        }: {
+            symbol: string;
+            testing: boolean;
+        }) => {
+            if (testing) {
+                const response = await axios.get(
+                    "https://www.alphavantage.co/query?function=OVERVIEW&symbol=IBM&apikey=demo"
+                );
+
+                return getSymbolDataReturnSchema.parse(response.data);
+            }
+
+            // api key is attached to ax
+            const response = await ax.get("", {
+                params: {
+                    function: "OVERVIEW",
+                    symbol,
+                },
+            });
+
+            return getSymbolDataReturnSchema.parse(response.data);
         },
     },
 } as const;

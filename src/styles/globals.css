@@ -2,6 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+.loading_spinner {
+    transform-origin: center;
+    animation: loading_spinner_animation 2s linear infinite;
+}
+.loading_spinner circle {
+    stroke-linecap: round;
+    animation: loading_spinner_circle_animation 1.5s ease-in-out infinite;
+}
+@keyframes loading_spinner_animation {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+@keyframes loading_spinner_circle_animation {
+    0% {
+        stroke-dasharray: 0 150;
+        stroke-dashoffset: 0;
+    }
+    47.5% {
+        stroke-dasharray: 42 150;
+        stroke-dashoffset: -16;
+    }
+    95%,
+    100% {
+        stroke-dasharray: 42 150;
+        stroke-dashoffset: -59;
+    }
+}
+
 rect {
     pointer-events: all;
     fill-opacity: 0;
