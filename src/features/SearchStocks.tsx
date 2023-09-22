@@ -41,7 +41,7 @@ const SearchStocks = ({ setSelectedStockSymbol }: SearchStocksProps) => {
                 onChange={(e) => setTickerSearch(e.target.value)}
             />
 
-            <div className="absolute inset-0 translate-y-full pt-2">
+            <div className="absolute inset-0 z-20 translate-y-full pt-2">
                 {tickerSymbols.isFetching ? (
                     <div className="flex flex-col rounded-md border border-slate-300 p-2 shadow-md">
                         <LoadingSpinner />

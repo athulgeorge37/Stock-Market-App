@@ -3,6 +3,7 @@ import Head from "next/head";
 import { useState } from "react";
 import { api } from "~/api";
 import Button from "~/components/Button";
+import DatePicker from "~/components/DatePicker";
 import Input from "~/components/Input";
 import LoadingSpinner from "~/components/LoadingSpinner";
 import SearchStocks from "~/features/SearchStocks";
@@ -112,13 +113,14 @@ export default function Home() {
 
                     <div>
                         {/* replace with calendar component */}
-                        <Input
+                        {/* <Input
                             id="select-investment-start-date"
                             type="date"
                             label="Select Investment Date"
                             className="w-[400px]"
                             hideError
-                        />
+                        /> */}
+                        <DatePicker />
                     </div>
                 </div>
             </main>
