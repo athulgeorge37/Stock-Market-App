@@ -17,7 +17,8 @@ export const env = createEnv({
      */
     client: {
         // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
-        NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY: z.string().min(1),
+        NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_1: z.string().min(1),
+        NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_2: z.string().min(1),
     },
 
     /**
@@ -27,8 +28,10 @@ export const env = createEnv({
     runtimeEnv: {
         NODE_ENV: process.env.NODE_ENV,
         // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
-        NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY:
-            process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY,
+        NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_1:
+            process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_1,
+        NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_2:
+            process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_2,
     },
     /**
      * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

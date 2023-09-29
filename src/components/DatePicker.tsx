@@ -14,7 +14,7 @@ import {
     startOfWeek,
 } from "date-fns";
 import { AnimatePresence, motion, MotionConfig } from "framer-motion";
-import { useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 
 import Button from "~/components/Button";
 import ResizablePanel from "~/components/ResizablePanel";
@@ -33,13 +33,21 @@ const variants = {
     },
 };
 
-const DatePicker = () => {
+interface DatePickerProps {
+    currentDaySelected: Date;
+    setCurrentDaySelected: Dispatch<SetStateAction<Date>>;
+}
+
+const DatePicker = ({
+    currentDaySelected,
+    setCurrentDaySelected,
+}: DatePickerProps) => {
     const today = startOfToday();
 
     const [monthAndYear, setMonthAndYear] = useState(
-        format(new Date(), "MM-yyyy")
+        format(currentDaySelected, "MM-yyyy")
     );
-    const [currentDaySelected, setCurrentDaySelected] = useState(today);
+    // const [currentDaySelected, setCurrentDaySelected] = useState(today);
     const [direction, setDirection] = useState<1 | -1>(1);
     const [isAnimating, setIsAnimating] = useState(false);
     const month = parse(monthAndYear, "MM-yyyy", new Date());

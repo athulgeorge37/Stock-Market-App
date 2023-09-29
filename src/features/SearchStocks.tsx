@@ -24,7 +24,6 @@ const SearchStocks = ({ setSelectedStockSymbol }: SearchStocksProps) => {
         queryFn: () =>
             api.alphaVantage.tickerSearch.query({
                 keywordSearch: debouncedTickerSearch,
-                testing: true,
             }),
         enabled: z.string().min(1).safeParse(debouncedTickerSearch).success,
     });

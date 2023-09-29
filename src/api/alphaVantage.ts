@@ -1,7 +1,7 @@
-import { ax } from "./axios";
 import axios from "axios";
 import { z } from "zod";
 import { parseISO } from "date-fns";
+import { getValidResponse } from "./axios";
 
 const dailyReturnSchema = z
     .object({
@@ -144,6 +144,8 @@ const getSymbolDataReturnSchema = z.object({
     ExDividendDate: z.string(), // "2023-08-09",
 });
 
+const testing = false;
+
 const alphaVantage = {
     daily: {
         key: "daily",
@@ -151,9 +153,8 @@ const alphaVantage = {
         query: async ({
             symbol,
             interval = "5min",
-            // period = "TIME_SERIES_INTRADAY",
-            testing = true,
-        }: {
+        }: // period = "TIME_SERIES_INTRADAY",
+        {
             symbol?: string;
             // period?:
             //     | "TIME_SERIES_INTRADAY"
@@ -161,8 +162,6 @@ const alphaVantage = {
             //     | "TIME_SERIES_WEEKLY"
             //     | "TIME_SERIES_MONTHLY";
             interval?: "1min" | "5min" | "15min" | "30min" | "60min";
-
-            testing: boolean;
         }) => {
             if (testing) {
                 const response = await axios.get(
@@ -173,12 +172,18 @@ const alphaVantage = {
             }
 
             // api key is attached to ax
-            const response = await ax.get("", {
-                params: {
-                    function: "TIME_SERIES_INTRADAY",
-                    symbol,
-                    interval,
-                },
+            // const response = await ax.get("", {
+            //     params: {
+            //         function: "TIME_SERIES_INTRADAY",
+            //         symbol,
+            //         interval,
+            //     },
+            // });
+
+            const response = await getValidResponse({
+                function: "TIME_SERIES_INTRADAY",
+                symbol,
+                interval,
             });
 
             return dailyReturnSchema.parse(response.data);
@@ -187,13 +192,7 @@ const alphaVantage = {
     tickerSearch: {
         key: "tickerSearch",
         schema: tickerSearchReturnSchema,
-        query: async ({
-            keywordSearch,
-            testing = true,
-        }: {
-            keywordSearch: string;
-            testing: boolean;
-        }) => {
+        query: async ({ keywordSearch }: { keywordSearch: string }) => {
             if (testing) {
                 const response = await axios.get(
                     "https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=tesco&apikey=demo"
@@ -203,11 +202,16 @@ const alphaVantage = {
             }
 
             // api key is attached to ax
-            const response = await ax.get("", {
-                params: {
-                    function: "SYMBOL_SEARCH",
-                    keywords: keywordSearch,
-                },
+            // const response = await ax.get("", {
+            //     params: {
+            //         function: "SYMBOL_SEARCH",
+            //         keywords: keywordSearch,
+            //     },
+            // });
+
+            const response = await getValidResponse({
+                function: "SYMBOL_SEARCH",
+                keywords: keywordSearch,
             });
 
             return tickerSearchReturnSchema.parse(response.data);
@@ -216,13 +220,7 @@ const alphaVantage = {
     getSymbolData: {
         key: "getSymbolData",
         schema: getSymbolDataReturnSchema,
-        query: async ({
-            symbol,
-            testing = true,
-        }: {
-            symbol: string;
-            testing: boolean;
-        }) => {
+        query: async ({ symbol }: { symbol: string }) => {
             if (testing) {
                 const response = await axios.get(
                     "https://www.alphavantage.co/query?function=OVERVIEW&symbol=IBM&apikey=demo"
@@ -232,11 +230,16 @@ const alphaVantage = {
             }
 
             // api key is attached to ax
-            const response = await ax.get("", {
-                params: {
-                    function: "OVERVIEW",
-                    symbol,
-                },
+            // const response = await ax.get("", {
+            //     params: {
+            //         function: "OVERVIEW",
+            //         symbol,
+            //     },
+            // });
+
+            const response = await getValidResponse({
+                function: "OVERVIEW",
+                symbol,
             });
 
             return getSymbolDataReturnSchema.parse(response.data);
