@@ -19,6 +19,7 @@ const API_KEY_ErrorSchema = z.object({
 const API_KEYS = [
     env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_1,
     env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_2,
+    env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_3,
 ] as const;
 
 let usingApiKey = 0;
@@ -38,6 +39,7 @@ const getValidResponse = async <P extends object>(
     const response = await ax.get("", {
         params: {
             ...params,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             apikey: API_KEYS.at(usingApiKey),
         },
     });

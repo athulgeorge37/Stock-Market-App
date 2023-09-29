@@ -19,6 +19,7 @@ export const env = createEnv({
         // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
         NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_1: z.string().min(1),
         NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_2: z.string().min(1),
+        NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_3: z.string().min(1),
     },
 
     /**
@@ -32,6 +33,8 @@ export const env = createEnv({
             process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_1,
         NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_2:
             process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_2,
+        NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_3:
+            process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY_3,
     },
     /**
      * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

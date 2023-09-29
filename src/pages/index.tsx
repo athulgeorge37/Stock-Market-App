@@ -6,7 +6,6 @@ import { useState } from "react";
 import { api } from "~/api";
 import Button from "~/components/Button";
 import DatePicker from "~/components/DatePicker";
-import Input from "~/components/Input";
 import LoadingSpinner from "~/components/LoadingSpinner";
 import PopOver, { usePopOver } from "~/components/PopOver";
 import SearchStocks from "~/features/SearchStocks";
@@ -18,6 +17,9 @@ export default function Home() {
     const today = startOfToday();
     const [currentDaySelected, setCurrentDaySelected] = useState(today);
 
+    const [timePeriod, setTimePeriod] = useState<
+        "day" | "week" | "month" | "year"
+    >("day");
     const [selectedStockSymbol, setSelectedStockSymbol] = useState<
         string | null
     >(null); // stock is the symbol
@@ -28,7 +30,7 @@ export default function Home() {
             api.alphaVantage.daily.query({
                 symbol: selectedStockSymbol!,
             }),
-        enabled: !!selectedStockSymbol,
+        // enabled: !!selectedStockSymbol,
     });
 
     const stockInformation = useQuery({
@@ -97,7 +99,36 @@ export default function Home() {
                         </div>
                     </div>
 
-                    <div>
+                    <div className="my-10 h-[500px] w-full max-w-[1200px] rounded-md border border-slate-300 shadow-lg">
+                        {stockData.isFetching ? (
+                            <LoadingSpinner />
+                        ) : (
+                            <>
+                                {stockData.data ? (
+                                    <StockVisualizer
+                                        metaData={stockData.data.metaData}
+                                        data={stockData.data.timeSeries}
+                                    />
+                                ) : (
+                                    !!selectedStockSymbol && (
+                                        <span>No Data Available</span>
+                                    )
+                                )}
+
+                                {/* <pre
+                                        className={"w-full max-w-xs text-clip"}
+                                    >
+                                        {JSON.stringify(
+                                            stockData.data ?? stockData.error,
+                                            null,
+                                            4
+                                        )}
+                                    </pre> */}
+                            </>
+                        )}
+                    </div>
+
+                    <div className="mb-10">
                         {stockInformation.isFetching ? (
                             <LoadingSpinner />
                         ) : stockInformation.data ? (
@@ -131,35 +162,6 @@ export default function Home() {
                                     information
                                 </span>
                             )
-                        )}
-                    </div>
-
-                    <div className="my-10 h-[500px] w-full max-w-[1200px] overflow-hidden rounded-md border border-slate-300">
-                        {stockData.isFetching ? (
-                            <LoadingSpinner />
-                        ) : (
-                            <>
-                                {stockData.data ? (
-                                    <StockVisualizer
-                                        metaData={stockData.data.metaData}
-                                        data={stockData.data.timeSeries}
-                                    />
-                                ) : (
-                                    !!selectedStockSymbol && (
-                                        <span>No Data Available</span>
-                                    )
-                                )}
-
-                                {/* <pre
-                                        className={"w-full max-w-xs text-clip"}
-                                    >
-                                        {JSON.stringify(
-                                            stockData.data ?? stockData.error,
-                                            null,
-                                            4
-                                        )}
-                                    </pre> */}
-                            </>
                         )}
                     </div>
                 </div>

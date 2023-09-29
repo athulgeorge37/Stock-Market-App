@@ -144,7 +144,7 @@ const getSymbolDataReturnSchema = z.object({
     ExDividendDate: z.string(), // "2023-08-09",
 });
 
-const testing = false;
+const testing = true;
 
 const alphaVantage = {
     daily: {
