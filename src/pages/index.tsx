@@ -1,17 +1,12 @@
-import {
-    CalendarIcon,
-    InformationCircleIcon,
-} from "@heroicons/react/24/outline";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
-import { format, startOfToday } from "date-fns";
 import Head from "next/head";
 import { useState } from "react";
 import { api } from "~/api";
 import Button from "~/components/Button";
-import DatePicker from "~/components/DatePicker";
 import LoadingSpinner from "~/components/LoadingSpinner";
-import PopOver, { usePopOver } from "~/components/PopOver";
 import SearchStocks from "~/features/SearchStocks";
+import StockCalculator from "~/features/StockCalculator";
 import StockVisualizer from "~/features/graphs/StockVisualizer";
 
 const TimePeriods = ["intra-day", "daily", "weekly", "monthly"] as const;
@@ -44,11 +39,6 @@ const TimePeriodsInformation: {
 ];
 
 export default function Home() {
-    const datePickerPopOver = usePopOver();
-
-    const today = startOfToday();
-    const [currentDaySelected, setCurrentDaySelected] = useState(today);
-
     const [timePeriod, setTimePeriod] = useState<TimePeriodsType>("intra-day");
 
     const [selectedStockSymbol, setSelectedStockSymbol] = useState<
@@ -109,36 +99,13 @@ export default function Home() {
             </Head>
             <main className="flex min-h-screen flex-col">
                 <div className="mx-auto mt-10 w-full max-w-[1200px]">
-                    <h1 className="text-3xl font-bold">Stock Visualizer</h1>
+                    <h1 className="text-4xl font-bold">Stock Visualizer</h1>
 
                     <div className="mt-4 flex items-end justify-between">
                         <div className="flex items-end gap-2">
                             <SearchStocks
                                 setSelectedStockSymbol={setSelectedStockSymbol}
                             />
-
-                            <PopOver
-                                popOver={datePickerPopOver}
-                                trigger={
-                                    <PopOver.Trigger
-                                        variant={"white-outline"}
-                                        // onClick={() => updateCurrentWeekTo("today")}
-                                        IconRight={CalendarIcon}
-                                    >
-                                        {format(
-                                            currentDaySelected,
-                                            "dd - MMM - yyyy"
-                                        )}
-                                    </PopOver.Trigger>
-                                }
-                            >
-                                <DatePicker
-                                    currentDaySelected={currentDaySelected}
-                                    setCurrentDaySelected={
-                                        setCurrentDaySelected
-                                    }
-                                />
-                            </PopOver>
                         </div>
 
                         <div className="flex h-fit gap-2">
@@ -177,7 +144,7 @@ export default function Home() {
                         })}
                     </div>
 
-                    <div className="my-4 h-[500px] w-full max-w-[1200px] rounded-md border border-slate-300 shadow-lg">
+                    <div className="mt-4 h-[500px] w-full max-w-[1200px] rounded-md border border-slate-300 shadow-lg">
                         {stockData.isFetching ? (
                             <div className="flex h-full items-center justify-center">
                                 <LoadingSpinner size={"lg"} />
@@ -198,7 +165,7 @@ export default function Home() {
                         )}
                     </div>
 
-                    <div className="mb-10">
+                    <div className="mb-4">
                         {stockInformation.isFetching ? (
                             <LoadingSpinner />
                         ) : stockInformation.data ? (
@@ -234,6 +201,12 @@ export default function Home() {
                             )
                         )}
                     </div>
+
+                    {selectedStockSymbol && (
+                        <div>
+                            <StockCalculator />
+                        </div>
+                    )}
                 </div>
             </main>
         </>

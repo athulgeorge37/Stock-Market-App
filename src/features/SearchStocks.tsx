@@ -32,8 +32,8 @@ const SearchStocks = ({ setSelectedStockSymbol }: SearchStocksProps) => {
         <div className="relative flex flex-col gap-2">
             <Input
                 id="search-stock"
-                // placeholder="TSLA"
-                label="Find A stock"
+                placeholder="TSLA"
+                label="Find A Stock"
                 className="w-[400px]"
                 hideError
                 value={tickerSearch}
@@ -42,7 +42,7 @@ const SearchStocks = ({ setSelectedStockSymbol }: SearchStocksProps) => {
 
             <div className="absolute inset-0 z-20 translate-y-full pt-2">
                 {tickerSymbols.isFetching ? (
-                    <div className="flex flex-col rounded-md border border-slate-300 p-2 shadow-md">
+                    <div className="flex flex-col rounded-md border border-slate-300 bg-white p-2 shadow-md">
                         <LoadingSpinner />
                     </div>
                 ) : tickerSymbols.data ? (
