@@ -29,7 +29,7 @@ const TimePeriodsInformation: {
     {
         period: "daily",
         description:
-            "Daily represents the closing price of the selected stock for each day since the stock's IPO.",
+            "Daily represents the closing price of the selected stock for each day within this year.",
     },
     {
         period: "weekly",

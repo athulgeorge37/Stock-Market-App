@@ -97,8 +97,10 @@ const StockVisualizer = ({ data, timePeriod }: StockVisualizerProps) => {
         const formatStringXAxis =
             timePeriod === "intra-day"
                 ? "hh:mm aa"
+                : timePeriod === "daily"
+                ? "MMM"
                 : timePeriod === "weekly"
-                ? "EEE do"
+                ? "yyyy"
                 : timePeriod === "monthly"
                 ? "yyyy"
                 : "hh:mm aa";
@@ -286,8 +288,10 @@ const StockVisualizer = ({ data, timePeriod }: StockVisualizerProps) => {
             const formatStringXAxisTooltip =
                 timePeriod === "intra-day"
                     ? "hh:mm aa"
+                    : timePeriod === "daily"
+                    ? "do MMM"
                     : timePeriod === "weekly"
-                    ? "EEE do MMM yyyy"
+                    ? "do MMM yyyy"
                     : timePeriod === "monthly"
                     ? "MMM yyyy"
                     : "hh:mm aa";
