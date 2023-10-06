@@ -1,4 +1,7 @@
-import { CalendarIcon } from "@heroicons/react/24/outline";
+import {
+    CalendarIcon,
+    InformationCircleIcon,
+} from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import { format, startOfToday } from "date-fns";
 import Head from "next/head";
@@ -11,26 +14,75 @@ import PopOver, { usePopOver } from "~/components/PopOver";
 import SearchStocks from "~/features/SearchStocks";
 import StockVisualizer from "~/features/graphs/StockVisualizer";
 
+const TimePeriods = ["intra-day", "daily", "weekly", "monthly"] as const;
+export type TimePeriodsType = (typeof TimePeriods)[number];
+
+const TimePeriodsInformation: {
+    period: TimePeriodsType;
+    description: string;
+}[] = [
+    {
+        period: "intra-day",
+        description:
+            "Intra-Day represents the closing price of the selected stock for the most recent trading day with each data point being recorded 5 minutes apart.",
+    },
+    {
+        period: "daily",
+        description:
+            "Daily represents the closing price of the selected stock for each day since the stock's IPO.",
+    },
+    {
+        period: "weekly",
+        description:
+            "Weekly represents the closing price of the selected stock for the last trading day of each week since the stock's IPO.",
+    },
+    {
+        period: "monthly",
+        description:
+            "Monthly represents the closing price of the selected stock for the last trading day of each month since the stock's IPO.",
+    },
+];
+
 export default function Home() {
     const datePickerPopOver = usePopOver();
 
     const today = startOfToday();
     const [currentDaySelected, setCurrentDaySelected] = useState(today);
 
-    const [timePeriod, setTimePeriod] = useState<
-        "day" | "week" | "month" | "year"
-    >("day");
+    const [timePeriod, setTimePeriod] = useState<TimePeriodsType>("intra-day");
+
     const [selectedStockSymbol, setSelectedStockSymbol] = useState<
         string | null
     >(null); // stock is the symbol
 
     const stockData = useQuery({
-        queryKey: [api.alphaVantage.daily.key, selectedStockSymbol],
-        queryFn: () =>
-            api.alphaVantage.daily.query({
-                symbol: selectedStockSymbol!,
-            }),
-        // enabled: !!selectedStockSymbol,
+        queryKey: [api.alphaVantage.daily.key, selectedStockSymbol, timePeriod],
+        queryFn: () => {
+            if (timePeriod === "intra-day") {
+                return api.alphaVantage.intraDay.query({
+                    symbol: selectedStockSymbol!,
+                });
+            }
+
+            if (timePeriod === "daily") {
+                return api.alphaVantage.daily.query({
+                    symbol: selectedStockSymbol!,
+                });
+            }
+
+            if (timePeriod === "weekly") {
+                return api.alphaVantage.weekly.query({
+                    symbol: selectedStockSymbol!,
+                });
+            }
+
+            if (timePeriod === "monthly") {
+                return api.alphaVantage.monthly.query({
+                    symbol: selectedStockSymbol!,
+                });
+            }
+        },
+        enabled: !!selectedStockSymbol,
     });
 
     const stockInformation = useQuery({
@@ -90,40 +142,58 @@ export default function Home() {
                         </div>
 
                         <div className="flex h-fit gap-2">
-                            <Button variant={"blue"}>Day</Button>
-                            <Button variant={"white-outline"}>Week</Button>
-
-                            <Button variant={"white-outline"}>Month</Button>
-
-                            <Button variant={"white-outline"}>Year</Button>
+                            {TimePeriods.map((tm) => (
+                                <Button
+                                    key={tm}
+                                    onClick={() => {
+                                        setTimePeriod(tm);
+                                    }}
+                                    variant={
+                                        tm === timePeriod
+                                            ? "blue"
+                                            : "white-outline"
+                                    }
+                                    className="capitalize"
+                                >
+                                    {tm}
+                                </Button>
+                            ))}
                         </div>
                     </div>
 
-                    <div className="my-10 h-[500px] w-full max-w-[1200px] rounded-md border border-slate-300 shadow-lg">
+                    <div className="my-4 flex items-center gap-2">
+                        <InformationCircleIcon className="h-5 w-5" />
+                        {TimePeriodsInformation.map((tradingPeriod) => {
+                            if (tradingPeriod.period === timePeriod) {
+                                return (
+                                    <span
+                                        key={`${tradingPeriod.period}-description`}
+                                    >
+                                        {tradingPeriod.description}
+                                    </span>
+                                );
+                            }
+                            return null;
+                        })}
+                    </div>
+
+                    <div className="my-4 h-[500px] w-full max-w-[1200px] rounded-md border border-slate-300 shadow-lg">
                         {stockData.isFetching ? (
-                            <LoadingSpinner />
+                            <div className="flex h-full items-center justify-center">
+                                <LoadingSpinner size={"lg"} />
+                            </div>
                         ) : (
                             <>
                                 {stockData.data ? (
                                     <StockVisualizer
-                                        metaData={stockData.data.metaData}
                                         data={stockData.data.timeSeries}
+                                        timePeriod={timePeriod}
                                     />
                                 ) : (
                                     !!selectedStockSymbol && (
                                         <span>No Data Available</span>
                                     )
                                 )}
-
-                                {/* <pre
-                                        className={"w-full max-w-xs text-clip"}
-                                    >
-                                        {JSON.stringify(
-                                            stockData.data ?? stockData.error,
-                                            null,
-                                            4
-                                        )}
-                                    </pre> */}
                             </>
                         )}
                     </div>

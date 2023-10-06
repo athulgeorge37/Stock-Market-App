@@ -29,7 +29,7 @@ const EACH_API_KEY_CALLS_LIMIT = 5;
 const getValidResponse = async <P extends object>(
     params: P
 ): Promise<AxiosResponse<unknown, unknown>> => {
-    // console.log(`Using API Key: ${usingApiKey}`);
+    console.log(`Using API Key: ${usingApiKey}`);
 
     attempts += 1;
     if (attempts > API_KEYS.length * EACH_API_KEY_CALLS_LIMIT) {

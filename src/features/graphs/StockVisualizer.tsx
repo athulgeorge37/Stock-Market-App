@@ -10,7 +10,6 @@ import { type api } from "~/api";
 import {
     select,
     line,
-    curveCardinal,
     axisBottom,
     scaleLinear,
     axisRight,
@@ -23,10 +22,11 @@ import {
     bisector,
 } from "d3";
 import { format } from "date-fns";
+import { type TimePeriodsType } from "~/pages";
 
 interface StockVisualizerProps {
-    metaData: z.infer<typeof api.alphaVantage.daily.schema>["metaData"];
     data: z.infer<typeof api.alphaVantage.daily.schema>["timeSeries"]; // use the close value as the number to use
+    timePeriod: TimePeriodsType;
 }
 
 type dataType = StockVisualizerProps["data"][number];
@@ -52,12 +52,6 @@ const useResizeObserver = (ref: RefObject<ElementRef<"div">>) => {
     return dimensions;
 };
 
-// const margin = {
-//     top: 70,
-//     right: 60,
-//     bottom: 50,
-//     left: 80,
-// } as const;
 const margin = {
     top: 0,
     right: 30,
@@ -68,7 +62,7 @@ const margin = {
 const graphAreaColour = "rgb(125 211 252)";
 const graphLineColour = "rgb(125 211 252)";
 
-const StockVisualizer = ({ data }: StockVisualizerProps) => {
+const StockVisualizer = ({ data, timePeriod }: StockVisualizerProps) => {
     // using a ref to let d3 handle rendering of the svg
     const svgRef = useRef<ElementRef<"svg">>(null);
     const svgWrapperRef = useRef<ElementRef<"div">>(null);
@@ -97,8 +91,17 @@ const StockVisualizer = ({ data }: StockVisualizerProps) => {
             .range([0, width])
             .domain(extent(data, (d) => d.date));
 
-        const minimum = min(data, (d) => d.close); // minimum value of data
-        const maximum = max(data, (d) => d.close); // maximum value of data
+        const minimum = min(data, (d) => d.close) ?? 0; // minimum value of data
+        const maximum = max(data, (d) => d.close) ?? 0; // maximum value of data
+
+        const formatStringXAxis =
+            timePeriod === "intra-day"
+                ? "hh:mm aa"
+                : timePeriod === "weekly"
+                ? "EEE do"
+                : timePeriod === "monthly"
+                ? "yyyy"
+                : "hh:mm aa";
 
         // yScale = the range of y values we want our data to occupy
         const yScale = scaleLinear()
@@ -110,7 +113,7 @@ const StockVisualizer = ({ data }: StockVisualizerProps) => {
         // .tickFormat((index) => index + 1);
         svg.select("#x-axis")
             .style("transform", `translateY(${height}px)`)
-            .call(xAxis.tickFormat((v) => format(v, "hh:mm aa")));
+            .call(xAxis.tickFormat((v) => format(v, formatStringXAxis)));
 
         // svg.append("g")
         //     .attr("class", "x-axis")
@@ -280,6 +283,15 @@ const StockVisualizer = ({ data }: StockVisualizerProps) => {
                     `$${d?.close !== undefined ? d.close.toFixed(2) : "N/A"}`
                 );
 
+            const formatStringXAxisTooltip =
+                timePeriod === "intra-day"
+                    ? "hh:mm aa"
+                    : timePeriod === "weekly"
+                    ? "EEE do MMM yyyy"
+                    : timePeriod === "monthly"
+                    ? "MMM yyyy"
+                    : "hh:mm aa";
+
             tooltipRawDate
                 .style("display", "block")
                 .style("left", `${rect.left + xPos}px`)
@@ -288,7 +300,7 @@ const StockVisualizer = ({ data }: StockVisualizerProps) => {
                 .html(
                     `${
                         d?.date !== undefined
-                            ? format(d.date, "hh:mm aa")
+                            ? format(d.date, formatStringXAxisTooltip)
                             : "N/A"
                     }`
                 );
@@ -305,7 +317,7 @@ const StockVisualizer = ({ data }: StockVisualizerProps) => {
             tooltipLineX.style("display", "none");
             tooltipLineY.style("display", "none");
         });
-    }, [dimensions]);
+    }, [dimensions, timePeriod]);
 
     return (
         <div
