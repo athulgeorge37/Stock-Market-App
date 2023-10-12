@@ -6,3 +6,8 @@ export type SVG =
               titleId?: string | undefined;
           } & React.RefAttributes<SVGSVGElement>
       >;
+
+export type OmitStrict<T extends object, K extends keyof T> = Pick<
+    T,
+    Exclude<keyof T, K>
+>;

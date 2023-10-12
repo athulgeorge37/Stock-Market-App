@@ -21,6 +21,8 @@ type InputProps = Omit<ComponentProps<"input">, "id" | "size"> & {
     IconLeftClassName?: string;
     IconRightClassName?: string;
     wrapperClassName?: string;
+    inputWrapperClassName?: string;
+    labelClassName?: string;
 } & InputStylesProps &
     IconInputProps;
 
@@ -49,6 +51,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             IconRightMargin,
             className = "",
             wrapperClassName = "",
+            labelClassName = "",
+            inputWrapperClassName = "",
             variant = "default",
             ...props
         },
@@ -61,13 +65,21 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 {label && (
                     <label
                         htmlFor={inputId}
-                        className="mb-1 font-semibold text-slate-800"
+                        className={cn(
+                            "mb-1 font-semibold text-slate-800",
+                            labelClassName
+                        )}
                     >
                         {label}
                     </label>
                 )}
 
-                <div className="relative flex items-center">
+                <div
+                    className={cn(
+                        "relative flex items-center",
+                        inputWrapperClassName
+                    )}
+                >
                     {IconLeft && (
                         <IconLeft
                             className={cn(
